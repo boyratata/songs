@@ -118,26 +118,23 @@ class SongPlayer(QtWidgets.QWidget):
                 print(f"Error fetching songs: {e}")
 
     def toggle_play_pause(self, item):
-        song_name = item.text()
-        song_data = self.song_dict.get(song_name)
-        if song_data:
-            if song_name == self.current_song:
-                if pygame.mixer.music.get_busy():
-                    pygame.mixer.music.pause()
-                else:
-                    pygame.mixer.music.unpause()
+    song_name = item.text()
+    song_data = self.song_dict.get(song_name)
+    if song_data:
+        if song_name == self.current_song:
+            if pygame.mixer.music.get_busy():
+                pygame.mixer.music.pause()
             else:
-                pygame.mixer.music.stop()
-                pygame.mixer.music.load(BytesIO(song_data))
-                pygame.mixer.music.set_volume(self.volume_slider.value() / 100)
-                if self.snd_loop:
-                    pygame.mixer.music.play(-1)
-                else:
-                    pygame.mixer.music.play()
-                self.current_song = song_name
-                QtCore.QTimer.singleShot(100, self.check_song_finished)
+                pygame.mixer.music.unpause()
         else:
-            print(f"Failed to play song: {song_name}")
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(BytesIO(song_data))
+            pygame.mixer.music.set_volume(self.volume_slider.value() / 100)
+            pygame.mixer.music.play(-1)  # Always set loop behavior to -1 (infinite loop)
+            self.current_song = song_name
+            QtCore.QTimer.singleShot(100, self.check_song_finished)
+    else:
+        print(f"Failed to play song: {song_name}")
 
     def set_loop(self, value):
         self.snd_loop = bool(value)
