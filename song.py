@@ -98,7 +98,7 @@ class SongPlayer(QtWidgets.QWidget):
             "https://github.com/boyratata/song-list/raw/main/wow.zip",
             "https://github.com/boyratata/song-list/raw/main/ay.zip",
             "https://github.com/boyratata/song-list/raw/main/u.zip",
-            "https://github.com/boyratata/song-list/raw/main/sup.ziP"
+            "https://github.com/boyratata/song-list/raw/main/sup.zip"
             
         ]
         for url in urls:
