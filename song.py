@@ -130,7 +130,7 @@ class SongPlayer(QtWidgets.QWidget):
             pygame.mixer.music.stop()
             pygame.mixer.music.load(BytesIO(song_data))
             pygame.mixer.music.set_volume(self.volume_slider.value() / 100)
-            pygame.mixer.music.play(-1)  # Always set loop behavior to -1 (infinite loop)
+            pygame.mixer.music.play(-1)
             self.current_song = song_name
             QtCore.QTimer.singleShot(100, self.check_song_finished)
     else:
