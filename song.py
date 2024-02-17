@@ -99,7 +99,6 @@ class SongPlayer(QtWidgets.QWidget):
             "https://github.com/boyratata/song-list/raw/main/ay.zip",
             "https://github.com/boyratata/song-list/raw/main/u.zip",
             "https://github.com/boyratata/song-list/raw/main/sup.zip"
-            
         ]
         for url in urls:
             try:
@@ -118,23 +117,23 @@ class SongPlayer(QtWidgets.QWidget):
                 print(f"Error fetching songs: {e}")
 
     def toggle_play_pause(self, item):
-    song_name = item.text()
-    song_data = self.song_dict.get(song_name)
-    if song_data:
-        if song_name == self.current_song:
-            if pygame.mixer.music.get_busy():
-                pygame.mixer.music.pause()
+        song_name = item.text()
+        song_data = self.song_dict.get(song_name)
+        if song_data:
+            if song_name == self.current_song:
+                if pygame.mixer.music.get_busy():
+                    pygame.mixer.music.pause()
+                else:
+                    pygame.mixer.music.unpause()
             else:
-                pygame.mixer.music.unpause()
+                pygame.mixer.music.stop()
+                pygame.mixer.music.load(BytesIO(song_data))
+                pygame.mixer.music.set_volume(self.volume_slider.value() / 100)
+                pygame.mixer.music.play(-1)
+                self.current_song = song_name
+                QtCore.QTimer.singleShot(100, self.check_song_finished)
         else:
-            pygame.mixer.music.stop()
-            pygame.mixer.music.load(BytesIO(song_data))
-            pygame.mixer.music.set_volume(self.volume_slider.value() / 100)
-            pygame.mixer.music.play(-1)
-            self.current_song = song_name
-            QtCore.QTimer.singleShot(100, self.check_song_finished)
-    else:
-        print(f"Failed to play song: {song_name}")
+            print(f"Failed to play song: {song_name}")
 
     def set_loop(self, value):
         self.snd_loop = bool(value)
