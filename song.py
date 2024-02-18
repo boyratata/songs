@@ -1,15 +1,78 @@
-import sys
-import requests
+import sys, requests, pygame
 from io import BytesIO
 from zipfile import ZipFile
 from PySide2 import QtWidgets, QtGui, QtCore
-import pygame
+
+class TitleBar(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        layout = QtWidgets.QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
+
+        owner_image_url = "https://github.com/boyratata/profile/raw/main/yo.PNG"
+        owner_image_data = requests.get(owner_image_url).content
+        owner_pixmap = QtGui.QPixmap()
+        owner_pixmap.loadFromData(owner_image_data)
+        owner_label = QtWidgets.QLabel()
+        owner_label.setPixmap(owner_pixmap.scaled(30, 30, aspectRatioMode=QtCore.Qt.KeepAspectRatio,
+                                                  transformMode=QtCore.Qt.SmoothTransformation))
+        layout.addWidget(owner_label)
+
+        self.title_label = QtWidgets.QLabel("Song Player")
+        self.title_label.setStyleSheet("color: white; font-size: 16px; font-weight: bold;")
+        layout.addWidget(self.title_label)
+        layout.addStretch()
+
+        self.minimize_button = QtWidgets.QPushButton("━")
+        self.minimize_button.clicked.connect(self.minimize_window)
+        self.minimize_button.setStyleSheet("color: white; font-weight: bold;")
+        self.minimize_button.setFixedSize(20, 20)
+        layout.addWidget(self.minimize_button)
+
+        self.maximize_button = QtWidgets.QPushButton("☐")
+        self.maximize_button.clicked.connect(self.maximize_window)
+        self.maximize_button.setStyleSheet("""
+            QPushButton {
+                color: white;
+                font-weight: bold;
+                border: none;
+                padding: 0;
+                margin: 0;
+                width: 20px;
+                height: 20px;
+                background-color: #455A64; /* Set background color */
+            }
+        """)
+        layout.addWidget(self.maximize_button)
+
+        self.close_button = QtWidgets.QPushButton("X")
+        self.close_button.clicked.connect(self.parent().close)
+        self.close_button.setStyleSheet("color: white; font-weight: bold;")
+        self.close_button.setFixedSize(20, 20)
+        layout.addWidget(self.close_button)
+
+        self.setFixedHeight(30)
+        self.setStyleSheet("background-color: #455A64;")
+
+    def minimize_window(self):
+        self.parent().showMinimized()
+
+    def maximize_window(self):
+        if self.parent().isMaximized():
+            self.parent().showNormal()
+            self.maximize_button.setText("☐")
+        else:
+            self.parent().showMaximized()
+            self.maximize_button.setText("❐")
+
 
 class SongPlayer(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Song Player")
         self.setGeometry(100, 100, 800, 500)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.setStyleSheet("background-color: #263238; color: #FFFFFF; font-size: 14px;")
 
         pygame.init()
@@ -17,7 +80,7 @@ class SongPlayer(QtWidgets.QWidget):
 
         self.song_dict = {}
         self.current_song = None
-        self.song_name = None 
+        self.song_name = None
 
         self.snd_loop = False
 
@@ -38,7 +101,8 @@ class SongPlayer(QtWidgets.QWidget):
     def init_ui(self):
         layout = QtWidgets.QVBoxLayout()
 
-        self.set_icon_from_github("https://github.com/boyratata/profile/raw/main/yo.PNG")
+        title_bar = TitleBar(self)
+        layout.addWidget(title_bar)
 
         owner_image_url = "https://github.com/boyratata/profile/raw/main/yo.PNG"
         owner_image_data = requests.get(owner_image_url).content
@@ -56,9 +120,10 @@ class SongPlayer(QtWidgets.QWidget):
         layout.addWidget(owner_name_label)
 
         self.song_list = QtWidgets.QListWidget()
-        self.song_list.setStyleSheet("color: #FFFFFF; background-color: #37474F; border-radius: 10px; padding: 10px;")
-        self.song_list.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)  
-        self.song_list.itemClicked.connect(self.toggle_play_pause)  
+        self.song_list.setStyleSheet(
+            "color: #FFFFFF; background-color: #37474F; border-radius: 10px; padding: 10px;")
+        self.song_list.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.song_list.itemClicked.connect(self.toggle_play_pause)
         layout.addWidget(self.song_list)
 
         self.volume_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -83,8 +148,8 @@ class SongPlayer(QtWidgets.QWidget):
         """
         self.volume_slider.setStyleSheet(slider_stylesheet)
         layout.addWidget(self.volume_slider)
-         
-        self.loop_checkbox = QtWidgets.QCheckBox("Loop")
+
+        self.loop_checkbox = QtWidgets.QCheckBox("repeat")
         self.loop_checkbox.stateChanged.connect(self.set_loop)
         layout.addWidget(self.loop_checkbox)
 
@@ -150,11 +215,11 @@ class SongPlayer(QtWidgets.QWidget):
         pygame.mixer.music.stop()
         event.accept()
 
-
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
 
     player = SongPlayer()
+    player.set_icon_from_github("https://github.com/boyratata/profile/raw/main/yo.PNG")
     player.show()
 
     sys.exit(app.exec_())
